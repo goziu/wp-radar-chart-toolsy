@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wp-radar-chart-toolsy/radar-chart",
+  "title": "レーダーチャート",
+  "category": "widgets",
+  "icon": "chart-line",
+  "description": "入力された内容でレーダーチャートを生成します",
+  "keywords": ["radar", "chart", "レーダー", "チャート"],
+  "version": "1.0.0",
+  "textdomain": "wp-radar-chart-toolsy",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "attributes": {
+    "items": {
+      "type": "array",
+      "default": [
+        { "label": "項目1", "value": 5 },
+        { "label": "項目2", "value": 5 },
+        { "label": "項目3", "value": 5 },
+        { "label": "項目4", "value": 5 },
+        { "label": "項目5", "value": 5 }
+      ]
+    },
+    "chartColor": {
+      "type": "string",
+      "default": "#3b82f6"
+    },
+    "blockId": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}

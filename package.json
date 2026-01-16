@@ -1,0 +1,27 @@
+{
+  "name": "wp-radar-chart-toolsy",
+  "version": "1.0.0",
+  "description": "入力された内容でレーダーチャートを生成するGutenbergブロックプラグイン",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build && npm run copy-frontend-css && node build-zip.js",
+    "start": "wp-scripts start",
+    "copy-frontend-css": "node copy-frontend-css.js",
+    "plugin-zip": "node build-zip.js"
+  },
+  "keywords": [
+    "wordpress",
+    "gutenberg",
+    "block",
+    "radar-chart"
+  ],
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@wordpress/scripts": "^26.0.0",
+    "archiver": "^6.0.1"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  }
+}

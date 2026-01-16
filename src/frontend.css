@@ -1,0 +1,12 @@
+.wp-radar-chart-toolsy-container {
+    margin: 20px 0;
+    text-align: center;
+    position: relative;
+}
+
+.wp-radar-chart-toolsy-container canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}

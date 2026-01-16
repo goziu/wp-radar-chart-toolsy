@@ -1,0 +1,11 @@
+.wp-radar-chart-toolsy-editor {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.wp-radar-chart-toolsy-editor canvas {
+    display: block;
+    margin: 0 auto;
+}
