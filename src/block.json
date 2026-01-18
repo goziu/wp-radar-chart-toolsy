@@ -27,6 +27,10 @@
       "type": "string",
       "default": "#3b82f6"
     },
+    "chartWidth": {
+      "type": "number",
+      "default": 500
+    },
     "blockId": {
       "type": "string",
       "default": ""

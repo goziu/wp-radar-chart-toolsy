@@ -62,6 +62,10 @@ function wp_radar_chart_toolsy_render_block($attributes) {
     $items = isset($attributes['items']) ? $attributes['items'] : array();
     $chartColor = isset($attributes['chartColor']) ? $attributes['chartColor'] : '#3b82f6';
     $blockId = isset($attributes['blockId']) ? $attributes['blockId'] : 'radar-chart-' . uniqid();
+    $chartWidth = isset($attributes['chartWidth']) ? intval($attributes['chartWidth']) : 500;
+    if ($chartWidth < 200) {
+        $chartWidth = 200;
+    }
 
     // 有効な項目のみをフィルタリング（最小5項目）
     $validItems = array_filter($items, function($item) {
@@ -84,7 +88,9 @@ function wp_radar_chart_toolsy_render_block($attributes) {
     ob_start();
     ?>
     <div class="wp-radar-chart-toolsy-container" data-block-id="<?php echo esc_attr($blockId); ?>">
-        <canvas id="<?php echo esc_attr($blockId); ?>" 
+        <canvas id="<?php echo esc_attr($blockId); ?>"
+                width="<?php echo esc_attr($chartWidth); ?>"
+                height="<?php echo esc_attr($chartWidth); ?>"
                 data-labels='<?php echo esc_attr(json_encode($labels)); ?>'
                 data-values='<?php echo esc_attr(json_encode($values)); ?>'
                 data-color='<?php echo esc_attr($chartColor); ?>'>
