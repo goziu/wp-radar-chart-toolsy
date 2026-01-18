@@ -22,6 +22,129 @@ define('WP_RADAR_CHART_TOOLSY_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_RADAR_CHART_TOOLSY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 /**
+ * 管理画面の初期ラベル
+ */
+function wp_radar_chart_toolsy_get_default_labels() {
+    return array('項目1', '項目2', '項目3', '項目4', '項目5', '項目6', '項目7');
+}
+
+/**
+ * 管理画面設定の取得
+ */
+function wp_radar_chart_toolsy_get_settings() {
+    $defaults = array(
+        'item_labels' => wp_radar_chart_toolsy_get_default_labels(),
+    );
+    $options = get_option('wp_radar_chart_toolsy_settings', array());
+    $options = wp_parse_args($options, $defaults);
+
+    if (!is_array($options['item_labels'])) {
+        $options['item_labels'] = $defaults['item_labels'];
+    }
+
+    for ($i = 0; $i < 7; $i++) {
+        if (!isset($options['item_labels'][$i]) || $options['item_labels'][$i] === '') {
+            $options['item_labels'][$i] = $defaults['item_labels'][$i];
+        } else {
+            $options['item_labels'][$i] = sanitize_text_field($options['item_labels'][$i]);
+        }
+    }
+
+    return $options;
+}
+
+/**
+ * 管理画面設定のサニタイズ
+ */
+function wp_radar_chart_toolsy_sanitize_settings($options) {
+    $defaults = wp_radar_chart_toolsy_get_default_labels();
+    $labels = array();
+
+    if (isset($options['item_labels']) && is_array($options['item_labels'])) {
+        $labels = array_slice($options['item_labels'], 0, 7);
+    }
+
+    for ($i = 0; $i < 7; $i++) {
+        $value = isset($labels[$i]) ? $labels[$i] : $defaults[$i];
+        $labels[$i] = sanitize_text_field($value);
+        if ($labels[$i] === '') {
+            $labels[$i] = $defaults[$i];
+        }
+    }
+
+    return array(
+        'item_labels' => $labels,
+    );
+}
+
+/**
+ * 管理画面メニューの追加
+ */
+function wp_radar_chart_toolsy_add_admin_menu() {
+    add_menu_page(
+        'レーダーチャート設定',
+        'レーダーチャート',
+        'manage_options',
+        'wp-radar-chart-toolsy-settings',
+        'wp_radar_chart_toolsy_render_settings_page',
+        'dashicons-chart-area',
+        81
+    );
+}
+add_action('admin_menu', 'wp_radar_chart_toolsy_add_admin_menu');
+
+/**
+ * 管理画面設定の登録
+ */
+function wp_radar_chart_toolsy_register_settings() {
+    register_setting(
+        'wp_radar_chart_toolsy_settings',
+        'wp_radar_chart_toolsy_settings',
+        array(
+            'sanitize_callback' => 'wp_radar_chart_toolsy_sanitize_settings',
+        )
+    );
+}
+add_action('admin_init', 'wp_radar_chart_toolsy_register_settings');
+
+/**
+ * 管理画面の設定ページ
+ */
+function wp_radar_chart_toolsy_render_settings_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $settings = wp_radar_chart_toolsy_get_settings();
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html__('レーダーチャート設定', 'wp-radar-chart-toolsy'); ?></h1>
+        <form method="post" action="options.php">
+            <?php settings_fields('wp_radar_chart_toolsy_settings'); ?>
+            <table class="form-table" role="presentation">
+                <tbody>
+                    <?php for ($i = 0; $i < 7; $i++) : ?>
+                        <tr>
+                            <th scope="row">
+                                <?php echo esc_html(sprintf('項目%dの初期名', $i + 1)); ?>
+                            </th>
+                            <td>
+                                <input type="text"
+                                       name="wp_radar_chart_toolsy_settings[item_labels][]"
+                                       value="<?php echo esc_attr($settings['item_labels'][$i]); ?>"
+                                       class="regular-text" />
+                            </td>
+                        </tr>
+                    <?php endfor; ?>
+                </tbody>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+/**
  * ブロックを登録
  */
 function wp_radar_chart_toolsy_register_block() {
@@ -46,6 +169,18 @@ function wp_radar_chart_toolsy_register_block() {
             'render_callback' => 'wp_radar_chart_toolsy_render_block',
         )
     );
+
+    if ($block_type && !empty($block_type->editor_script_handles)) {
+        $editor_handle = $block_type->editor_script_handles[0];
+        add_action('enqueue_block_editor_assets', function() use ($editor_handle) {
+            $settings = wp_radar_chart_toolsy_get_settings();
+            $inline_data = array(
+                'itemLabels' => array_values($settings['item_labels']),
+            );
+            $script = 'window.wpRadarChartToolsyDefaults = ' . wp_json_encode($inline_data) . ';';
+            wp_add_inline_script($editor_handle, $script, 'before');
+        });
+    }
 
     // エラーチェック（デバッグ用）
     if (!$block_type) {
