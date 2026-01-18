@@ -18,6 +18,7 @@
         const labels = JSON.parse(canvas.dataset.labels || '[]');
         const values = JSON.parse(canvas.dataset.values || '[]');
         const color = canvas.dataset.color || '#3b82f6';
+        const showTotal = canvas.dataset.showTotal === '1';
 
         if (labels.length === 0 || values.length === 0) {
             return;
@@ -28,6 +29,35 @@
         let animationProgress = 0;
         const animationDuration = 1000; // 1秒
         const startTime = Date.now();
+
+        const totalValue = values.reduce((sum, value) => sum + (Number(value) || 0), 0);
+        const totalText = `合計: ${totalValue}`;
+
+        const totalLabelPlugin = {
+            id: 'totalLabelPlugin',
+            afterDraw(chart) {
+                if (!showTotal) {
+                    return;
+                }
+
+                const ctx = chart.ctx;
+                if (!ctx) {
+                    return;
+                }
+
+                const chartArea = chart.chartArea;
+                const centerX = chartArea ? (chartArea.left + chartArea.right) / 2 : chart.width / 2;
+                const centerY = chartArea ? (chartArea.top + chartArea.bottom) / 2 : chart.height / 2;
+
+                ctx.save();
+                ctx.fillStyle = '#374151';
+                ctx.font = '24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(totalText, centerX, centerY);
+                ctx.restore();
+            }
+        };
 
         // Chart.jsの設定
         const chartConfig = {
@@ -50,6 +80,14 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        enabled: true,
+                    }
+                },
                 scales: {
                     r: {
                         beginAtZero: true,
@@ -70,18 +108,11 @@
                         },
                     }
                 },
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    tooltip: {
-                        enabled: true,
-                    }
-                },
                 animation: {
                     duration: 0, // Chart.jsのアニメーションを無効化（手動で制御）
                 }
-            }
+            },
+            plugins: [totalLabelPlugin]
         };
 
         const chart = new Chart(canvas, chartConfig);

@@ -1,6 +1,6 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, RangeControl, TextControl } from '@wordpress/components';
+import { PanelBody, RangeControl, TextControl, ToggleControl } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import './editor.css';
 import metadata from './block.json';
@@ -8,10 +8,11 @@ import metadata from './block.json';
 /**
  * レーダーチャートを描画する関数
  */
-function drawRadarChart(canvas, labels, values, color) {
+function drawRadarChart(canvas, labels, values, color, showTotal) {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = Math.min(centerX, centerY) - 40;
@@ -124,13 +125,26 @@ function drawRadarChart(canvas, labels, values, color) {
 
         ctx.fillText('10', x, y);
     }
+
+    // 合計値を表示（中央のみ）
+    if (showTotal) {
+        const totalValue = values.reduce((sum, value) => sum + (Number(value) || 0), 0);
+        const displayTotal = `合計: ${totalValue}`;
+
+        ctx.fillStyle = '#374151';
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        ctx.fillText(displayTotal, centerX, centerY);
+    }
 }
 
 /**
  * エディタ用のブロックコンポーネント
  */
 function Edit({ attributes, setAttributes }) {
-    const { items, chartColor, blockId, chartWidth } = attributes;
+    const { items, chartColor, blockId, chartWidth, showTotal } = attributes;
     const resolvedChartWidth = Number.isFinite(chartWidth) ? chartWidth : 500;
     const blockProps = useBlockProps({
         className: 'wp-radar-chart-toolsy-editor',
@@ -160,9 +174,9 @@ function Edit({ attributes, setAttributes }) {
         if (canvas) {
             const labels = items.map(item => item.label || '');
             const values = items.map(item => item.value || 0);
-            drawRadarChart(canvas, labels, values, chartColor);
+            drawRadarChart(canvas, labels, values, chartColor, showTotal);
         }
-    }, [items, chartColor, blockId, chartWidth]);
+    }, [items, chartColor, blockId, chartWidth, showTotal]);
 
     // 項目の更新
     const updateItem = (index, field, value) => {
@@ -215,6 +229,11 @@ function Edit({ attributes, setAttributes }) {
                         min={200}
                         max={1200}
                         step={10}
+                    />
+                    <ToggleControl
+                        label="合計値を出力する"
+                        checked={!!showTotal}
+                        onChange={(value) => setAttributes({ showTotal: value })}
                     />
                 </PanelBody>
 
