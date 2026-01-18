@@ -5,6 +5,17 @@ import { useEffect } from '@wordpress/element';
 import './editor.css';
 import metadata from './block.json';
 
+const fallbackLabels = ['項目1', '項目2', '項目3', '項目4', '項目5', '項目6', '項目7'];
+const defaultLabels =
+    typeof window !== 'undefined' &&
+    Array.isArray(window.wpRadarChartToolsyDefaults?.itemLabels)
+        ? window.wpRadarChartToolsyDefaults.itemLabels
+        : fallbackLabels;
+const getLabelForIndex = (index) => defaultLabels[index] || `項目${index + 1}`;
+const isDefaultItems = (items) =>
+    items.length === 5 &&
+    items.every((item, index) => item.label === fallbackLabels[index] && item.value === 5);
+
 /**
  * レーダーチャートを描画する関数
  */
@@ -144,11 +155,22 @@ function drawRadarChart(canvas, labels, values, color, showTotal) {
  * エディタ用のブロックコンポーネント
  */
 function Edit({ attributes, setAttributes }) {
-    const { items, chartColor, blockId, chartWidth, showTotal } = attributes;
+    const { items, chartColor, blockId, chartWidth, showTotal, defaultsApplied } = attributes;
     const resolvedChartWidth = Number.isFinite(chartWidth) ? chartWidth : 500;
     const blockProps = useBlockProps({
         className: 'wp-radar-chart-toolsy-editor',
     });
+
+    // 管理画面の初期値を新規ブロックに反映
+    useEffect(() => {
+        if (!defaultsApplied && defaultLabels.length > 0 && isDefaultItems(items)) {
+            const newItems = items.map((item, index) => ({
+                ...item,
+                label: getLabelForIndex(index),
+            }));
+            setAttributes({ items: newItems, defaultsApplied: true });
+        }
+    }, [defaultsApplied, items]);
 
     // ブロックIDが未設定の場合は生成
     useEffect(() => {
@@ -162,7 +184,7 @@ function Edit({ attributes, setAttributes }) {
         if (items.length < 5) {
             const newItems = [...items];
             while (newItems.length < 5) {
-                newItems.push({ label: `項目${newItems.length + 1}`, value: 5 });
+                newItems.push({ label: getLabelForIndex(newItems.length), value: 5 });
             }
             setAttributes({ items: newItems });
         }
@@ -189,7 +211,7 @@ function Edit({ attributes, setAttributes }) {
     const addItem = () => {
         if (items.length < 7) {
             setAttributes({
-                items: [...items, { label: `項目${items.length + 1}`, value: 5 }],
+                items: [...items, { label: getLabelForIndex(items.length), value: 5 }],
             });
         }
     };

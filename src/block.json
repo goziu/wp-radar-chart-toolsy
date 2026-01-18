@@ -35,6 +35,10 @@
       "type": "boolean",
       "default": false
     },
+    "defaultsApplied": {
+      "type": "boolean",
+      "default": false
+    },
     "blockId": {
       "type": "string",
       "default": ""
