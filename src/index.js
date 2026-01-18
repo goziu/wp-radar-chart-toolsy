@@ -132,7 +132,7 @@ function drawRadarChart(canvas, labels, values, color, showTotal) {
         const displayTotal = `合計: ${totalValue}`;
 
         ctx.fillStyle = '#374151';
-        ctx.font = '12px sans-serif';
+        ctx.font = '24px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
