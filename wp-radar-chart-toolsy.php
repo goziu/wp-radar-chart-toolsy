@@ -34,6 +34,8 @@ function wp_radar_chart_toolsy_get_default_labels() {
 function wp_radar_chart_toolsy_get_settings() {
     $defaults = array(
         'item_labels' => wp_radar_chart_toolsy_get_default_labels(),
+        'chart_color' => '#3b82f6',
+        'chart_width' => 500,
     );
     $options = get_option('wp_radar_chart_toolsy_settings', array());
     $options = wp_parse_args($options, $defaults);
@@ -49,6 +51,22 @@ function wp_radar_chart_toolsy_get_settings() {
             $options['item_labels'][$i] = sanitize_text_field($options['item_labels'][$i]);
         }
     }
+
+    $chart_color = sanitize_hex_color($options['chart_color']);
+    if (!$chart_color) {
+        $chart_color = $defaults['chart_color'];
+    }
+
+    $chart_width = absint($options['chart_width']);
+    if ($chart_width < 200) {
+        $chart_width = 200;
+    }
+    if ($chart_width > 1200) {
+        $chart_width = 1200;
+    }
+
+    $options['chart_color'] = $chart_color;
+    $options['chart_width'] = $chart_width;
 
     return $options;
 }
@@ -72,8 +90,23 @@ function wp_radar_chart_toolsy_sanitize_settings($options) {
         }
     }
 
+    $chart_color = isset($options['chart_color']) ? sanitize_hex_color($options['chart_color']) : '#3b82f6';
+    if (!$chart_color) {
+        $chart_color = '#3b82f6';
+    }
+
+    $chart_width = isset($options['chart_width']) ? absint($options['chart_width']) : 500;
+    if ($chart_width < 200) {
+        $chart_width = 200;
+    }
+    if ($chart_width > 1200) {
+        $chart_width = 1200;
+    }
+
     return array(
         'item_labels' => $labels,
+        'chart_color' => $chart_color,
+        'chart_width' => $chart_width,
     );
 }
 
@@ -123,6 +156,26 @@ function wp_radar_chart_toolsy_render_settings_page() {
             <?php settings_fields('wp_radar_chart_toolsy_settings'); ?>
             <table class="form-table" role="presentation">
                 <tbody>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('チャートカラー', 'wp-radar-chart-toolsy'); ?></th>
+                        <td>
+                            <input type="color"
+                                   name="wp_radar_chart_toolsy_settings[chart_color]"
+                                   value="<?php echo esc_attr($settings['chart_color']); ?>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('チャート幅（px）', 'wp-radar-chart-toolsy'); ?></th>
+                        <td>
+                            <input type="number"
+                                   name="wp_radar_chart_toolsy_settings[chart_width]"
+                                   value="<?php echo esc_attr($settings['chart_width']); ?>"
+                                   min="200"
+                                   max="1200"
+                                   step="10"
+                                   class="small-text" />
+                        </td>
+                    </tr>
                     <?php for ($i = 0; $i < 7; $i++) : ?>
                         <tr>
                             <th scope="row">
@@ -176,6 +229,8 @@ function wp_radar_chart_toolsy_register_block() {
             $settings = wp_radar_chart_toolsy_get_settings();
             $inline_data = array(
                 'itemLabels' => array_values($settings['item_labels']),
+                'chartColor' => $settings['chart_color'],
+                'chartWidth' => $settings['chart_width'],
             );
             $script = 'window.wpRadarChartToolsyDefaults = ' . wp_json_encode($inline_data) . ';';
             wp_add_inline_script($editor_handle, $script, 'before');
@@ -184,7 +239,7 @@ function wp_radar_chart_toolsy_register_block() {
 
     // エラーチェック（デバッグ用）
     if (!$block_type) {
-        error_log('wp-radar-chart-toolsy: ブロックの登録に失敗しました。block.jsonのパス: ' . $block_dir);
+        error_log('wp-radar-chart-toolsy: ブロックの登録に失敗しました。block.jsonのパス: ' . $block_json);
     }
 }
 add_action('init', 'wp_radar_chart_toolsy_register_block');
