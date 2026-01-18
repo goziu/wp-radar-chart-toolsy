@@ -6,11 +6,21 @@ import './editor.css';
 import metadata from './block.json';
 
 const fallbackLabels = ['項目1', '項目2', '項目3', '項目4', '項目5', '項目6', '項目7'];
+const fallbackChartColor = '#3b82f6';
+const fallbackChartWidth = 500;
 const defaultLabels =
     typeof window !== 'undefined' &&
     Array.isArray(window.wpRadarChartToolsyDefaults?.itemLabels)
         ? window.wpRadarChartToolsyDefaults.itemLabels
         : fallbackLabels;
+const defaultChartColor =
+    typeof window !== 'undefined' && window.wpRadarChartToolsyDefaults?.chartColor
+        ? window.wpRadarChartToolsyDefaults.chartColor
+        : fallbackChartColor;
+const defaultChartWidth =
+    typeof window !== 'undefined' && Number.isFinite(window.wpRadarChartToolsyDefaults?.chartWidth)
+        ? window.wpRadarChartToolsyDefaults.chartWidth
+        : fallbackChartWidth;
 const getLabelForIndex = (index) => defaultLabels[index] || `項目${index + 1}`;
 const isDefaultItems = (items) =>
     items.length === 5 &&
@@ -163,14 +173,25 @@ function Edit({ attributes, setAttributes }) {
 
     // 管理画面の初期値を新規ブロックに反映
     useEffect(() => {
-        if (!defaultsApplied && defaultLabels.length > 0 && isDefaultItems(items)) {
+        if (
+            !defaultsApplied &&
+            defaultLabels.length > 0 &&
+            isDefaultItems(items) &&
+            chartColor === fallbackChartColor &&
+            resolvedChartWidth === fallbackChartWidth
+        ) {
             const newItems = items.map((item, index) => ({
                 ...item,
                 label: getLabelForIndex(index),
             }));
-            setAttributes({ items: newItems, defaultsApplied: true });
+            setAttributes({
+                items: newItems,
+                chartColor: defaultChartColor,
+                chartWidth: defaultChartWidth,
+                defaultsApplied: true,
+            });
         }
-    }, [defaultsApplied, items]);
+    }, [defaultsApplied, items, chartColor, resolvedChartWidth]);
 
     // ブロックIDが未設定の場合は生成
     useEffect(() => {
