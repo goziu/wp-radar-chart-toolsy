@@ -130,7 +130,8 @@ function drawRadarChart(canvas, labels, values, color) {
  * エディタ用のブロックコンポーネント
  */
 function Edit({ attributes, setAttributes }) {
-    const { items, chartColor, blockId } = attributes;
+    const { items, chartColor, blockId, chartWidth } = attributes;
+    const resolvedChartWidth = Number.isFinite(chartWidth) ? chartWidth : 500;
     const blockProps = useBlockProps({
         className: 'wp-radar-chart-toolsy-editor',
     });
@@ -161,7 +162,7 @@ function Edit({ attributes, setAttributes }) {
             const values = items.map(item => item.value || 0);
             drawRadarChart(canvas, labels, values, chartColor);
         }
-    }, [items, chartColor, blockId]);
+    }, [items, chartColor, blockId, chartWidth]);
 
     // 項目の更新
     const updateItem = (index, field, value) => {
@@ -207,6 +208,14 @@ function Edit({ attributes, setAttributes }) {
                             囲まれた中身は50%透過で表示されます
                         </p>
                     </div>
+                    <RangeControl
+                        label="チャート幅（px）"
+                        value={resolvedChartWidth}
+                        onChange={(value) => setAttributes({ chartWidth: value })}
+                        min={200}
+                        max={1200}
+                        step={10}
+                    />
                 </PanelBody>
 
                 <PanelBody title="項目設定" initialOpen={true}>
@@ -265,8 +274,8 @@ function Edit({ attributes, setAttributes }) {
             <div style={{ padding: '20px', textAlign: 'center' }}>
                 <canvas
                     id={'radar-chart-preview-' + blockId}
-                    width={500}
-                    height={500}
+                    width={resolvedChartWidth}
+                    height={resolvedChartWidth}
                     style={{ maxWidth: '100%', height: 'auto' }}
                 />
             </div>
