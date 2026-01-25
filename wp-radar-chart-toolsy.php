@@ -3,7 +3,7 @@
  * Plugin Name: Radar Chart Toolsy
  * Plugin URI: https://plus-webskill.com/plugins
  * Description: 入力された内容でレーダーチャートを生成するGutenbergブロックプラグイン
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Toolsy
  * Author URI: https://plus-webskill.com/
  * Requires at least: 6.8
