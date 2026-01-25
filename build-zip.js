@@ -5,6 +5,7 @@ const archiver = require('archiver');
 // zipファイルに含めるファイルとディレクトリ
 const includeFiles = [
   'wp-radar-chart-toolsy.php',
+  'inc',
   'build',
   'README.md'
 ];

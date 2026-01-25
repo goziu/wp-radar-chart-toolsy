@@ -1,14 +1,13 @@
 <?php
 /**
  * Plugin Name: Radar Chart Toolsy
- * Plugin URI: https://github.com/your-username/wp-radar-chart-toolsy
+ * Plugin URI: https://plus-webskill.com/plugins
  * Description: 入力された内容でレーダーチャートを生成するGutenbergブロックプラグイン
- * Version: 1.0.1
- * Author: Your Name
- * Author URI: https://yourwebsite.com
- * License: GPL-2.0-or-later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-radar-chart-toolsy
+ * Version: 1.0.2
+ * Author: Toolsy
+ * Author URI: https://plus-webskill.com/
+ * Requires at least: 6.8
+ * Requires PHP:      7.4
  */
 
 // 直接アクセスを防ぐ
@@ -20,6 +19,31 @@ if (!defined('ABSPATH')) {
 define('WP_RADAR_CHART_TOOLSY_VERSION', '1.0.0');
 define('WP_RADAR_CHART_TOOLSY_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_RADAR_CHART_TOOLSY_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+if ( ! defined( 'MY_TOOLSY_PLUGIN_FILE' ) ) {
+	define( 'MY_TOOLSY_PLUGIN_FILE', __FILE__ );
+}
+
+$my_toolsy_core_file = __DIR__ . '/inc/toolsy-core.php';
+$my_toolsy_theme_file = __DIR__ . '/inc/toolsy-theme-check.php';
+
+if ( file_exists( $my_toolsy_core_file ) && file_exists( $my_toolsy_theme_file ) ) {
+	require_once $my_toolsy_core_file;
+	require_once $my_toolsy_theme_file;
+	add_action( 'plugins_loaded', 'my_toolsy_integrity_guard_strong', 0 );
+} else {
+	if ( is_admin() ) {
+		add_action( 'admin_notices', function () {
+			echo '<div class="notice notice-error is-dismissible"><p>';
+			echo esc_html__( '必要なファイルが見つからないため、プラグインを有効化できません。', 'wp-radar-chart-toolsy' );
+			echo '</p></div>';
+		} );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		deactivate_plugins( plugin_basename( MY_TOOLSY_PLUGIN_FILE ) );
+		unset( $_GET['activate'] );
+	}
+	if ( ! defined( 'MY_TOOLSY_BLOCKED' ) ) define( 'MY_TOOLSY_BLOCKED', true );
+}
 
 /**
  * 管理画面の初期ラベル
@@ -211,7 +235,6 @@ function wp_radar_chart_toolsy_register_block() {
     
     // block.jsonが存在するか確認
     if (!file_exists($block_json)) {
-        error_log('wp-radar-chart-toolsy: block.jsonが見つかりません。パス: ' . $block_json);
         return;
     }
 
@@ -239,7 +262,7 @@ function wp_radar_chart_toolsy_register_block() {
 
     // エラーチェック（デバッグ用）
     if (!$block_type) {
-        error_log('wp-radar-chart-toolsy: ブロックの登録に失敗しました。block.jsonのパス: ' . $block_json);
+        return;
     }
 }
 add_action('init', 'wp_radar_chart_toolsy_register_block');
