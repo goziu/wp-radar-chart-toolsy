@@ -219,7 +219,6 @@ function wp_radar_chart_toolsy_register_block() {
     
     // block.jsonが存在するか確認
     if (!file_exists($block_json)) {
-        error_log('wp-radar-chart-toolsy: block.jsonが見つかりません。パス: ' . $block_json);
         return;
     }
 
@@ -247,7 +246,7 @@ function wp_radar_chart_toolsy_register_block() {
 
     // エラーチェック（デバッグ用）
     if (!$block_type) {
-        error_log('wp-radar-chart-toolsy: ブロックの登録に失敗しました。block.jsonのパス: ' . $block_json);
+        return;
     }
 }
 add_action('init', 'wp_radar_chart_toolsy_register_block');
