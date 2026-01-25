@@ -1,14 +1,13 @@
 <?php
 /**
  * Plugin Name: Radar Chart Toolsy
- * Plugin URI: https://github.com/your-username/wp-radar-chart-toolsy
+ * Plugin URI: https://plus-webskill.com/plugins
  * Description: 入力された内容でレーダーチャートを生成するGutenbergブロックプラグイン
  * Version: 1.0.1
- * Author: Your Name
- * Author URI: https://yourwebsite.com
- * License: GPL-2.0-or-later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-radar-chart-toolsy
+ * Author: Toolsy
+ * Author URI: https://plus-webskill.com/
+ * Requires at least: 6.8
+ * Requires PHP:      7.4
  */
 
 // 直接アクセスを防ぐ
