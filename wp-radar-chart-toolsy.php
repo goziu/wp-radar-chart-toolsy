@@ -24,10 +24,26 @@ if ( ! defined( 'MY_TOOLSY_PLUGIN_FILE' ) ) {
 	define( 'MY_TOOLSY_PLUGIN_FILE', __FILE__ );
 }
 
-require_once __DIR__ . '/inc/toolsy-core.php';
-require_once __DIR__ . '/inc/toolsy-theme-check.php';
+$my_toolsy_core_file = __DIR__ . '/inc/toolsy-core.php';
+$my_toolsy_theme_file = __DIR__ . '/inc/toolsy-theme-check.php';
 
-add_action( 'plugins_loaded', 'my_toolsy_integrity_guard_strong', 0 );
+if ( file_exists( $my_toolsy_core_file ) && file_exists( $my_toolsy_theme_file ) ) {
+	require_once $my_toolsy_core_file;
+	require_once $my_toolsy_theme_file;
+	add_action( 'plugins_loaded', 'my_toolsy_integrity_guard_strong', 0 );
+} else {
+	if ( is_admin() ) {
+		add_action( 'admin_notices', function () {
+			echo '<div class="notice notice-error is-dismissible"><p>';
+			echo esc_html__( '必要なファイルが見つからないため、プラグインを有効化できません。', 'wp-radar-chart-toolsy' );
+			echo '</p></div>';
+		} );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		deactivate_plugins( plugin_basename( MY_TOOLSY_PLUGIN_FILE ) );
+		unset( $_GET['activate'] );
+	}
+	if ( ! defined( 'MY_TOOLSY_BLOCKED' ) ) define( 'MY_TOOLSY_BLOCKED', true );
+}
 
 /**
  * 管理画面の初期ラベル
