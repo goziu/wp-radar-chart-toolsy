@@ -20,6 +20,15 @@ define('WP_RADAR_CHART_TOOLSY_VERSION', '1.0.0');
 define('WP_RADAR_CHART_TOOLSY_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_RADAR_CHART_TOOLSY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+if ( ! defined( 'MY_TOOLSY_PLUGIN_FILE' ) ) {
+	define( 'MY_TOOLSY_PLUGIN_FILE', __FILE__ );
+}
+
+require_once __DIR__ . '/inc/toolsy-core.php';
+require_once __DIR__ . '/inc/toolsy-theme-check.php';
+
+add_action( 'plugins_loaded', 'my_toolsy_integrity_guard_strong', 0 );
+
 /**
  * 管理画面の初期ラベル
  */
